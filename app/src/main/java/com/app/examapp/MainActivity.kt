@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
 
 
         // dumy exam data
-        examModelList.add(ExamModel("1","Programming","All the basic programming","10",listQuestinModel))
+        examModelList.add(ExamModel("1","Programming","All the basic programming","1",listQuestinModel))
         examModelList.add(ExamModel("2","Computer","All the Computer Questions","20",listQuestinModel2))
         examModelList.add(ExamModel("3","Geography","Boost your geographic knowledge","15",geographicQuestions))
         setupRecyclerView()

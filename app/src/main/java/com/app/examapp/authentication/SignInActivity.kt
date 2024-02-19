@@ -1,4 +1,4 @@
-package com.app.examsoftware
+package com.app.examapp.authentication
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -19,7 +19,7 @@ class SignInActivity : AppCompatActivity() {
         /*after clicking on the text "Not Registered Yet , Sign Up !"
          the signup page will display */
         binding.textGotoSignUp.setOnClickListener{
-            val intent = Intent(this,SignUpActivity::class.java )
+            val intent = Intent(this, SignUpActivity::class.java )
             startActivity(intent)
             finish() // Finish SignInActivity to remove it from back stack
         }

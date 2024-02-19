@@ -16,13 +16,22 @@
             android:name=".QuizExamActivity"
             android:exported="false" />
         <activity
+            android:name=".authentication.SignInActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+        </activity>
+        <activity
+            android:name=".authentication.SignUpActivity"
+            android:exported="false">
+
         </activity>
     </application>
 
