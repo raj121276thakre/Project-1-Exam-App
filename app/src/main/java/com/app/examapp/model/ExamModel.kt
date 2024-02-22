@@ -15,10 +15,11 @@ data class ExamModel(
 // quiz page data
 
 data class QuestionModel(
+    val index: Int,
     val question : String,
     val options : List<String>,
     val correct : String
 ){
-    constructor():this("", emptyList(),"")
+    constructor():this(0,"", emptyList(),"")
 }
 

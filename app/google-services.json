@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "900820712726",
+    "project_id": "exam-app-58774",
+    "storage_bucket": "exam-app-58774.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:900820712726:android:7fb6010bb8feabd20e2437",
+        "android_client_info": {
+          "package_name": "com.app.examapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGPp_WTtZKNzsEX65HongekbyDF_5SPP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

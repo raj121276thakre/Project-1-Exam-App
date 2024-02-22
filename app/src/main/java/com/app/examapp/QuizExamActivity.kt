@@ -7,6 +7,7 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.app.examapp.databinding.ActivityQuizExamBinding
 import com.app.examapp.databinding.ScoreDialogBinding
@@ -41,6 +42,7 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             //next btn
             nextBtn.setOnClickListener(this@QuizExamActivity)
             previousBtn.setOnClickListener(this@QuizExamActivity)
+            submitBtn.setOnClickListener(this@QuizExamActivity)
         }
 
         loadQuestions()
@@ -66,6 +68,10 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun loadQuestions() {
+
+        // Check if it's the last question
+        val isLastQuestion = currentQuestionIndex == questionModelList.size - 1
+
         if (currentQuestionIndex == questionModelList.size) {
             finishQuiz()
             return
@@ -75,7 +81,7 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             //question number
             questionIndicatorTextview.text = "Question ${currentQuestionIndex + 1}/ ${questionModelList.size}"
             //question progress
-            questionProgressIndicator.progress = (currentQuestionIndex.toFloat() / questionModelList.size.toFloat() * 100).toInt()
+            questionProgressIndicator.progress =( (currentQuestionIndex + 1).toFloat() / questionModelList.size.toFloat() * 100).toInt()
             //question title
             questionTextview.text = questionModelList[currentQuestionIndex].question
             //options
@@ -100,6 +106,17 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 selectedButton.setBackgroundColor(getColor(R.color.orange))
             }
+
+
+            // Update visibility of Next and Submit buttons
+            if (isLastQuestion) {
+                nextBtn.visibility = View.GONE
+                submitBtn.visibility = View.VISIBLE
+            } else {
+                nextBtn.visibility = View.VISIBLE
+                submitBtn.visibility = View.GONE
+            }
+
         }
     }
 
@@ -120,6 +137,10 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             R.id.previous_btn -> {
                 // Previous button clicked
                 loadPreviousQuestion()
+            }
+            R.id.submitBtn -> {
+                // Previous button clicked
+                finishQuiz()
             }
             else -> {
                 // Options button clicked
@@ -143,8 +164,6 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-
-
     private fun loadNextQuestion() {
         // Save the selected answer for the current question
         selectedAnswers[currentQuestionIndex] = selectedAns
@@ -154,14 +173,13 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             Log.i("Score of Quiz", score.toString())
         }
 
-        // Move to the next question
-        currentQuestionIndex++
-
         // Check if it's the last question
-        if (currentQuestionIndex == questionModelList.size) {
+        if (currentQuestionIndex == questionModelList.size - 1) {
             // If it's the last question, finish the quiz and show the dialog
             finishQuiz()
         } else {
+            // Move to the next question
+            currentQuestionIndex++
             // Load the selected answer for the next question
             selectedAns = selectedAnswers[currentQuestionIndex]
             loadQuestions()
@@ -169,10 +187,43 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
+
+//    private fun loadNextQuestion() {
+//        // Save the selected answer for the current question
+//        selectedAnswers[currentQuestionIndex] = selectedAns
+//        // Check if the selected answer is correct
+//        if (selectedAns == questionModelList[currentQuestionIndex].correct) {
+//            score++
+//            Log.i("Score of Quiz", score.toString())
+//        }
+//
+//        // Move to the next question
+//        currentQuestionIndex++
+//
+//        // Check if it's the last question
+//        if (currentQuestionIndex == questionModelList.size) {
+//            // If it's the last question, finish the quiz and show the dialog
+//
+//            finishQuiz()
+//        } else {
+//            // Load the selected answer for the next question
+//            selectedAns = selectedAnswers[currentQuestionIndex]
+//            loadQuestions()
+//        }
+//    }
+
+
     private fun finishQuiz() {
         // after questions finish the score dialog will display with result
+        // Check if the selected answer for the last question is correct and increment score if necessary
+        if (selectedAns == questionModelList.last().correct) {
+            score++
+        }
+
         val totalQuestions = questionModelList.size
         val percentage = ((score.toFloat() / totalQuestions.toFloat()) * 100).toInt()
+
+
 
         val dialogBinding = ScoreDialogBinding.inflate(layoutInflater)
         dialogBinding.apply {
