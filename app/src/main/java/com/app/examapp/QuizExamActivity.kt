@@ -31,7 +31,7 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var drawerLayout: DrawerLayout
 
     private var isQuestionBookmarkedList = MutableList<Boolean>(questionModelList.size) { false }
-
+    private val bookmarkedQuestions = mutableListOf<Int>()
 
     companion object {
         var questionModelList: List<QuestionModel> = listOf()
@@ -69,11 +69,69 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
         displayGridviewData()
 
         binding.bookmarkBtn.setOnClickListener {
-            updateBookmarkStatus(currentQuestionIndex)
+            //updateBookmarkStatus(currentQuestionIndex)
+            toggleBookmarkStatus(currentQuestionIndex)
+            updateBookmarkButton()
         }
 
-
+// Load the bookmark button's initial image
+        updateBookmarkButton()
     }//.................................................................
+
+    private fun displayGridviewData() {
+        // Sample data for the GridView
+        val questionNumbers = mutableListOf<String>()
+        for (i in 1..questionModelList.size) {
+            questionNumbers.add("$i")
+        }
+
+        // Find the GridView
+        val gridView: GridView = findViewById(R.id.gridView)
+
+        // Create and set the adapter
+        val adapter = QuestionGridAdapter(this, questionNumbers, bookmarkedQuestions)
+        gridView.adapter = adapter
+    }
+
+    private fun toggleBookmarkStatus(questionIndex: Int) {
+        if (questionIndex in bookmarkedQuestions) {
+            // If the question is already bookmarked, remove it from the list
+            bookmarkedQuestions.remove(questionIndex)
+        } else {
+            // If the question is not bookmarked, add it to the list
+            bookmarkedQuestions.add(questionIndex)
+        }
+    }
+
+    private fun updateBookmarkButton() {
+        val bookmarkButton: ImageButton = findViewById(R.id.bookmark_btn)
+
+        if (currentQuestionIndex in bookmarkedQuestions) {
+            // Change the bookmark button's image to bookmarked state
+            bookmarkButton.setImageResource(R.drawable.bookmark_filled)
+        } else {
+            // Change the bookmark button's image to unbookmarked state
+            bookmarkButton.setImageResource(R.drawable.bookmark2)
+        }
+
+        // Update the background tint color of the question number circle in the GridView
+        val gridView: GridView = findViewById(R.id.gridView)
+        for (i in 0 until gridView.childCount) {
+            val view = gridView.getChildAt(i)
+            if (view != null) {
+                val questionNumberTextView: TextView = view.findViewById(R.id.question_number)
+                val questionIndex = i
+                if (questionIndex in bookmarkedQuestions) {
+                    // Question is bookmarked, change the background color to pink
+                    questionNumberTextView.backgroundTintList =
+                        ColorStateList.valueOf(Color.parseColor("#F802EC"))
+                } else {
+                    // Question is not bookmarked, change the background color to gray
+                    questionNumberTextView.backgroundTintList = ColorStateList.valueOf(Color.GRAY)
+                }
+            }
+        }
+    }
 
 
     private fun drawerOpenClose() {
@@ -95,21 +153,6 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
         }
     }
-
-    private fun displayGridviewData() {
-        // Sample data for the GridView
-        val questionNumbers = mutableListOf<String>()
-        for (i in 1..questionModelList.size) {
-            questionNumbers.add("$i")
-        }
-        // Find the GridView
-        val gridView: GridView = findViewById(R.id.gridView)
-
-        // Create and set the adapter
-        val adapter = QuestionGridAdapter(this, questionNumbers)
-        gridView.adapter = adapter
-    }
-
 
     private fun startTimer() {
         val totalTimeInMills = time.toInt() * 60 * 1000L
@@ -189,6 +232,9 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             }
 
         }
+
+        // Update bookmark button image for the current question
+        updateBookmarkButton()
     }
 
     override fun onClick(view: View?) {
@@ -230,41 +276,6 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-    private fun updateBookmarkStatus(questionIndex: Int) {
-        // Get the GridView
-        val gridView: GridView = findViewById(R.id.gridView)
-
-        // Toggle the bookmark status
-        isQuestionBookmarkedList[questionIndex] = !isQuestionBookmarkedList[questionIndex]
-
-        // Get the bookmark button for the current question
-        val bookmarkButton: ImageButton = findViewById(R.id.bookmark_btn)
-
-        // Update the image of the bookmark button based on the bookmark status
-        if (isQuestionBookmarkedList[questionIndex]) {
-            // Question is bookmarked, change the image to bookmarked state
-            bookmarkButton.setImageResource(R.drawable.bookmark_filled)
-        } else {
-            // Question is not bookmarked, change the image to unbookmarked state
-            bookmarkButton.setImageResource(R.drawable.bookmark2)
-        }
-
-        // Update the background tint color of the question number circle in the GridView
-        val view = gridView.getChildAt(questionIndex)
-        if (view != null) {
-            val questionNumberTextView: TextView = view.findViewById(R.id.question_number)
-            if (isQuestionBookmarkedList[questionIndex]) {
-                // Question is bookmarked, change the background color to pink
-                questionNumberTextView.backgroundTintList =
-                    ColorStateList.valueOf(Color.parseColor("#F802EC"))
-            } else {
-                // Question is not bookmarked, change the background color to gray
-                questionNumberTextView.backgroundTintList = ColorStateList.valueOf(Color.GRAY)
-            }
-        }
-    }
-
-
     private fun loadPreviousQuestion() {
         if (currentQuestionIndex > 0) {
             // Save the selected answer for the current question
@@ -288,6 +299,10 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             Log.i("Score of Quiz", score.toString())
         }
 
+        // Change bookmark button image based on next question's bookmark status
+        updateBookmarkButton()
+
+
         // Check if it's the last question
         if (currentQuestionIndex == questionModelList.size - 1) {
             // If it's the last question, finish the quiz and show the dialog
@@ -298,6 +313,9 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             // Load the selected answer for the next question
             selectedAns = selectedAnswers[currentQuestionIndex]
             loadQuestions()
+
+            // Update bookmark button image for the next question
+            updateBookmarkButton()
         }
     }
 
