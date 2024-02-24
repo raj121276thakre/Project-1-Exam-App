@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Exam App</string>
     <string name="about">Let\'s play this awesome quiz app to enhance your knowledge.</string>
+    <string name="about_app">Welcome to our online examination platform! Test your knowledge and skills.</string>
     <string name="hint_for_email">Type your Email</string>
     <string name="hint_for_password">Type Your Password</string>
     <string name="logout">logout</string>

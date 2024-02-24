@@ -7,8 +7,11 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.Toast
+import android.widget.GridView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import com.app.examapp.adapter.QuestionGridAdapter
 import com.app.examapp.databinding.ActivityQuizExamBinding
 import com.app.examapp.databinding.ScoreDialogBinding
 import com.app.examapp.model.QuestionModel
@@ -16,6 +19,8 @@ import com.app.examapp.model.QuestionModel
 class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
     lateinit var binding: ActivityQuizExamBinding // declaration of binding
+
+    private lateinit var drawerLayout: DrawerLayout
 
     companion object {
         var questionModelList: List<QuestionModel> = listOf()
@@ -32,6 +37,32 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
         binding = ActivityQuizExamBinding.inflate(layoutInflater)   // initialization of binding
         setContentView(binding.root)
 
+        // Sample data for the GridView
+        val items = listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
+
+        // Find the GridView
+        val gridView: GridView = findViewById(R.id.gridView)
+
+        // Create and set the adapter
+        val adapter = QuestionGridAdapter(this, items)
+        gridView.adapter = adapter
+
+
+        // Initialize the DrawerLayout
+        drawerLayout = binding.drawerLayout
+        // Set click listener for Drawer_btn to open/close drawer
+        binding.DrawerBtn.setOnClickListener {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START)
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START)
+            }
+        }
+
+
+
+
+
         // onclick on options and next btn
         binding.apply {
             //options
@@ -47,7 +78,9 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
         loadQuestions()
         startTimer()
-    }
+
+
+    }//.................................................................
 
     private fun startTimer() {
         val totalTimeInMills = time.toInt() * 60 * 1000L
@@ -57,7 +90,8 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
                 val minutes = seconds / 60
                 val remainingSeconds = seconds % 60
                 //showing timer on timer indicator
-                binding.timerIndicatorTextview.text = String.format("%02d:%02d", minutes, remainingSeconds)
+                binding.timerIndicatorTextview.text =
+                    String.format("%02d:%02d", minutes, remainingSeconds)
             }
 
             override fun onFinish() {
@@ -79,9 +113,11 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
         binding.apply {
             //question number
-            questionIndicatorTextview.text = "Question ${currentQuestionIndex + 1}/ ${questionModelList.size}"
+            questionIndicatorTextview.text =
+                "Question ${currentQuestionIndex + 1}/ ${questionModelList.size}"
             //question progress
-            questionProgressIndicator.progress =( (currentQuestionIndex + 1).toFloat() / questionModelList.size.toFloat() * 100).toInt()
+            questionProgressIndicator.progress =
+                ((currentQuestionIndex + 1).toFloat() / questionModelList.size.toFloat() * 100).toInt()
             //question title
             questionTextview.text = questionModelList[currentQuestionIndex].question
             //options
@@ -134,14 +170,17 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
                 // Next button clicked
                 loadNextQuestion()
             }
+
             R.id.previous_btn -> {
                 // Previous button clicked
                 loadPreviousQuestion()
             }
+
             R.id.submitBtn -> {
                 // Previous button clicked
                 finishQuiz()
             }
+
             else -> {
                 // Options button clicked
                 selectedAns = clickedBtn.text.toString()
@@ -187,32 +226,6 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-
-//    private fun loadNextQuestion() {
-//        // Save the selected answer for the current question
-//        selectedAnswers[currentQuestionIndex] = selectedAns
-//        // Check if the selected answer is correct
-//        if (selectedAns == questionModelList[currentQuestionIndex].correct) {
-//            score++
-//            Log.i("Score of Quiz", score.toString())
-//        }
-//
-//        // Move to the next question
-//        currentQuestionIndex++
-//
-//        // Check if it's the last question
-//        if (currentQuestionIndex == questionModelList.size) {
-//            // If it's the last question, finish the quiz and show the dialog
-//
-//            finishQuiz()
-//        } else {
-//            // Load the selected answer for the next question
-//            selectedAns = selectedAnswers[currentQuestionIndex]
-//            loadQuestions()
-//        }
-//    }
-
-
     private fun finishQuiz() {
         // after questions finish the score dialog will display with result
         // Check if the selected answer for the last question is correct and increment score if necessary
@@ -222,7 +235,6 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
         val totalQuestions = questionModelList.size
         val percentage = ((score.toFloat() / totalQuestions.toFloat()) * 100).toInt()
-
 
 
         val dialogBinding = ScoreDialogBinding.inflate(layoutInflater)
