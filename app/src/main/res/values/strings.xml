@@ -5,4 +5,5 @@
     <string name="hint_for_email">Type your Email</string>
     <string name="hint_for_password">Type Your Password</string>
     <string name="logout">logout</string>
+    <string name="bookmark">Bookmark</string>
 </resources>

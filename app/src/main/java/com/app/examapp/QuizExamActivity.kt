@@ -1,5 +1,7 @@
 package com.app.examapp
 
+import android.content.ContentValues.TAG
+import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -8,6 +10,8 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.GridView
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -15,12 +19,19 @@ import com.app.examapp.adapter.QuestionGridAdapter
 import com.app.examapp.databinding.ActivityQuizExamBinding
 import com.app.examapp.databinding.ScoreDialogBinding
 import com.app.examapp.model.QuestionModel
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
     lateinit var binding: ActivityQuizExamBinding // declaration of binding
 
     private lateinit var drawerLayout: DrawerLayout
+
+    private var isQuestionBookmarkedList = MutableList<Boolean>(questionModelList.size) { false }
+
 
     companion object {
         var questionModelList: List<QuestionModel> = listOf()
@@ -37,31 +48,7 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
         binding = ActivityQuizExamBinding.inflate(layoutInflater)   // initialization of binding
         setContentView(binding.root)
 
-        // Sample data for the GridView
-        val items = listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
-
-        // Find the GridView
-        val gridView: GridView = findViewById(R.id.gridView)
-
-        // Create and set the adapter
-        val adapter = QuestionGridAdapter(this, items)
-        gridView.adapter = adapter
-
-
-        // Initialize the DrawerLayout
-        drawerLayout = binding.drawerLayout
-        // Set click listener for Drawer_btn to open/close drawer
-        binding.DrawerBtn.setOnClickListener {
-            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                drawerLayout.closeDrawer(GravityCompat.START)
-            } else {
-                drawerLayout.openDrawer(GravityCompat.START)
-            }
-        }
-
-
-
-
+        drawerOpenClose()
 
         // onclick on options and next btn
         binding.apply {
@@ -74,13 +61,55 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             nextBtn.setOnClickListener(this@QuizExamActivity)
             previousBtn.setOnClickListener(this@QuizExamActivity)
             submitBtn.setOnClickListener(this@QuizExamActivity)
+
         }
 
         loadQuestions()
         startTimer()
+        displayGridviewData()
+
+        binding.bookmarkBtn.setOnClickListener {
+            updateBookmarkStatus(currentQuestionIndex)
+        }
 
 
     }//.................................................................
+
+
+    private fun drawerOpenClose() {
+        // Find the close_drawerbtn button within the included layout
+        val closeDrawerButton: ImageButton = findViewById(R.id.close_drawerbtn)
+        // Initialize the DrawerLayout
+        drawerLayout = binding.drawerLayout
+        // Set click listener for Drawer_btn to open/close drawer
+        binding.DrawerBtn.setOnClickListener {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START)
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START)
+            }
+        }
+
+        // Set click listener for the close_drawerbtn to close the drawer
+        closeDrawerButton.setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+        }
+    }
+
+    private fun displayGridviewData() {
+        // Sample data for the GridView
+        val questionNumbers = mutableListOf<String>()
+        for (i in 1..questionModelList.size) {
+            questionNumbers.add("$i")
+        }
+        // Find the GridView
+        val gridView: GridView = findViewById(R.id.gridView)
+
+        // Create and set the adapter
+        val adapter = QuestionGridAdapter(this, questionNumbers)
+        gridView.adapter = adapter
+    }
+
 
     private fun startTimer() {
         val totalTimeInMills = time.toInt() * 60 * 1000L
@@ -110,9 +139,15 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             finishQuiz()
             return
         }
+        val currentQuestion = questionModelList[currentQuestionIndex]
 
         binding.apply {
             //question number
+            val questionNumber = currentQuestion.index
+            //  questionIndicatorTextview.text = "Question $questionNumber / ${questionModelList.size}"
+
+            // Update question index textview
+            questionIndexTextview.text = "Q $questionNumber"
             questionIndicatorTextview.text =
                 "Question ${currentQuestionIndex + 1}/ ${questionModelList.size}"
             //question progress
@@ -181,13 +216,54 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
                 finishQuiz()
             }
 
+
             else -> {
                 // Options button clicked
                 selectedAns = clickedBtn.text.toString()
                 clickedBtn.setBackgroundColor(getColor(R.color.orange))
+
+
+            }
+        }
+
+
+    }
+
+
+    private fun updateBookmarkStatus(questionIndex: Int) {
+        // Get the GridView
+        val gridView: GridView = findViewById(R.id.gridView)
+
+        // Toggle the bookmark status
+        isQuestionBookmarkedList[questionIndex] = !isQuestionBookmarkedList[questionIndex]
+
+        // Get the bookmark button for the current question
+        val bookmarkButton: ImageButton = findViewById(R.id.bookmark_btn)
+
+        // Update the image of the bookmark button based on the bookmark status
+        if (isQuestionBookmarkedList[questionIndex]) {
+            // Question is bookmarked, change the image to bookmarked state
+            bookmarkButton.setImageResource(R.drawable.bookmark_filled)
+        } else {
+            // Question is not bookmarked, change the image to unbookmarked state
+            bookmarkButton.setImageResource(R.drawable.bookmark2)
+        }
+
+        // Update the background tint color of the question number circle in the GridView
+        val view = gridView.getChildAt(questionIndex)
+        if (view != null) {
+            val questionNumberTextView: TextView = view.findViewById(R.id.question_number)
+            if (isQuestionBookmarkedList[questionIndex]) {
+                // Question is bookmarked, change the background color to pink
+                questionNumberTextView.backgroundTintList =
+                    ColorStateList.valueOf(Color.parseColor("#F802EC"))
+            } else {
+                // Question is not bookmarked, change the background color to gray
+                questionNumberTextView.backgroundTintList = ColorStateList.valueOf(Color.GRAY)
             }
         }
     }
+
 
     private fun loadPreviousQuestion() {
         if (currentQuestionIndex > 0) {

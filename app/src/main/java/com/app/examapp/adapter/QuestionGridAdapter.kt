@@ -8,14 +8,14 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import com.app.examapp.R
 
-class QuestionGridAdapter(private val context: Context, private val questionList: List<String>) : BaseAdapter() {
+class QuestionGridAdapter(private val context: Context, private val questionNumbers: List<String>) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return questionList.size
+        return questionNumbers.size
     }
 
     override fun getItem(position: Int): Any {
-        return questionList[position]
+        return questionNumbers[position]
     }
 
     override fun getItemId(position: Int): Long {
@@ -37,7 +37,7 @@ class QuestionGridAdapter(private val context: Context, private val questionList
         }
 
         // Set the question number
-        holder.questionNumber.text = (position + 1).toString()
+        holder.questionNumber.text = questionNumbers[position]
 
         return view
     }
