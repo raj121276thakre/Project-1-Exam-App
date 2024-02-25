@@ -24,23 +24,7 @@ class QuestionGridAdapter(private val context: Context, private val questionNumb
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-//        val view: View
-//        val holder: ViewHolder
-//
-//        if (convertView == null) {
-//            view = LayoutInflater.from(context).inflate(R.layout.question_grid_item, parent, false)
-//            holder = ViewHolder()
-//            holder.questionNumber = view.findViewById(R.id.question_number)
-//            view.tag = holder
-//        } else {
-//            view = convertView
-//            holder = view.tag as ViewHolder
-//        }
-//
-//        // Set the question number
-//        holder.questionNumber.text = questionNumbers[position]
-//
-//        return view
+
         var view = convertView
         val holder: ViewHolder
         if (view == null) {

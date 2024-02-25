@@ -13,6 +13,7 @@ import android.widget.GridView
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.app.examapp.adapter.QuestionGridAdapter
@@ -32,6 +33,8 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
     private var isQuestionBookmarkedList = MutableList<Boolean>(questionModelList.size) { false }
     private val bookmarkedQuestions = mutableListOf<Int>()
+
+
 
     companion object {
         var questionModelList: List<QuestionModel> = listOf()
@@ -70,8 +73,12 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
         binding.bookmarkBtn.setOnClickListener {
             //updateBookmarkStatus(currentQuestionIndex)
+//            toggleBookmarkStatus(currentQuestionIndex)
+//            updateBookmarkButton()
+
             toggleBookmarkStatus(currentQuestionIndex)
             updateBookmarkButton()
+            updateGridItemColor()
         }
 
 // Load the bookmark button's initial image
@@ -235,7 +242,50 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
         // Update bookmark button image for the current question
         updateBookmarkButton()
+
     }
+
+    private fun updateGridItemColor() {
+        val gridView: GridView = findViewById(R.id.gridView)
+        val currentQuestion = questionModelList[currentQuestionIndex]
+        val currentQuestionNumber = currentQuestion.index - 1 // Adjust index to start from 0
+
+        for (i in 0 until gridView.childCount) {
+            val view = gridView.getChildAt(i)
+            if (view != null) {
+                val questionNumberTextView: TextView = view.findViewById(R.id.question_number)
+                val questionIndex = i
+
+                val isAnswered = selectedAnswers[questionIndex] != null
+                val isBookmarked = questionIndex in bookmarkedQuestions
+
+                if (isBookmarked) {
+                    // Question is bookmarked
+                    questionNumberTextView.backgroundTintList =
+                        ColorStateList.valueOf(Color.parseColor("#F802EC"))
+                } else if (isAnswered) {
+                    // User answered the question
+                    questionNumberTextView.backgroundTintList =
+                        ColorStateList.valueOf(Color.GREEN)
+                } else if (questionIndex == currentQuestionNumber) {
+
+
+                    // Current question
+                    questionNumberTextView.backgroundTintList =
+                        ColorStateList.valueOf(ContextCompat.getColor(this, R.color.yellow))
+
+
+                } else {
+                    // Unanswered question
+                    questionNumberTextView.backgroundTintList =
+                        ColorStateList.valueOf(Color.GRAY)
+                }
+            }
+        }
+    }
+
+
+
 
     override fun onClick(view: View?) {
         binding.apply {
@@ -250,11 +300,13 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             R.id.next_btn -> {
                 // Next button clicked
                 loadNextQuestion()
+                updateGridItemColor()
             }
 
             R.id.previous_btn -> {
                 // Previous button clicked
                 loadPreviousQuestion()
+                updateGridItemColor()
             }
 
             R.id.submitBtn -> {
@@ -268,6 +320,8 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
                 selectedAns = clickedBtn.text.toString()
                 clickedBtn.setBackgroundColor(getColor(R.color.orange))
 
+                updateGridItemColor()
+
 
             }
         }
@@ -276,10 +330,19 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
+
+
+
+
+
+
+
+
     private fun loadPreviousQuestion() {
         if (currentQuestionIndex > 0) {
             // Save the selected answer for the current question
             selectedAnswers[currentQuestionIndex] = selectedAns
+
             currentQuestionIndex--
             // Load the selected answer for the previous question
             selectedAns = selectedAnswers[currentQuestionIndex]
@@ -288,6 +351,7 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             selectedAns = selectedAnswers[currentQuestionIndex]
             loadQuestions()
         }
+        updateGridItemColor()
     }
 
     private fun loadNextQuestion() {
@@ -298,6 +362,8 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             score++
             Log.i("Score of Quiz", score.toString())
         }
+
+        
 
         // Change bookmark button image based on next question's bookmark status
         updateBookmarkButton()
@@ -317,6 +383,7 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             // Update bookmark button image for the next question
             updateBookmarkButton()
         }
+        updateGridItemColor()
     }
 
 
@@ -352,6 +419,8 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             .setView(dialogBinding.root)
             .setCancelable(false)
             .show()
+
+        updateGridItemColor()
     }
 }
 

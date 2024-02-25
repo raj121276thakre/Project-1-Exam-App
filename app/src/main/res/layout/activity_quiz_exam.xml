@@ -96,6 +96,7 @@
 
             <!-- Your other layout elements -->
 
+
         </RelativeLayout>
 
         <androidx.cardview.widget.CardView
@@ -240,8 +241,6 @@
             </LinearLayout>
 
 
-
-
         </androidx.cardview.widget.CardView>
 
     </LinearLayout>
@@ -255,44 +254,3 @@
 
 
 </androidx.drawerlayout.widget.DrawerLayout>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

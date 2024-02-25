@@ -77,7 +77,7 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginRight="18dp"
-            app:srcCompat="@drawable/circle_red"
+            app:srcCompat="@drawable/circle_gray"
             tools:layout_editor_absoluteX="13dp"
             tools:layout_editor_absoluteY="34dp" />
 
@@ -85,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Un-Answered"
-            android:textColor="@color/red"
+            android:textColor="@color/gray_circle"
             android:textSize="18sp"
             android:textStyle="bold"
             tools:layout_editor_absoluteX="106dp"
@@ -109,15 +109,15 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginRight="18dp"
-            app:srcCompat="@drawable/circle_gray"
+            app:srcCompat="@drawable/circle_yellow"
             tools:layout_editor_absoluteX="13dp"
             tools:layout_editor_absoluteY="34dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Not Visited"
-            android:textColor="@color/gray_circle"
+            android:text="Current ?"
+            android:textColor="@color/yellow"
             android:textSize="18sp"
             android:textStyle="bold"
             tools:layout_editor_absoluteX="106dp"
