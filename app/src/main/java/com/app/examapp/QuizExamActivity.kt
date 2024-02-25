@@ -1,9 +1,8 @@
 package com.app.examapp
 
-import android.content.ContentValues.TAG
+
 import android.content.res.ColorStateList
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -13,6 +12,7 @@ import android.widget.GridView
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -20,25 +20,24 @@ import com.app.examapp.adapter.QuestionGridAdapter
 import com.app.examapp.databinding.ActivityQuizExamBinding
 import com.app.examapp.databinding.ScoreDialogBinding
 import com.app.examapp.model.QuestionModel
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
-class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
+import android.hardware.Camera
+import android.view.SurfaceHolder
+import android.view.SurfaceView
+
+class QuizExamActivity : AppCompatActivity(), View.OnClickListener, SurfaceHolder.Callback  {
 
     lateinit var binding: ActivityQuizExamBinding // declaration of binding
 
     private lateinit var drawerLayout: DrawerLayout
-
-    private var isQuestionBookmarkedList = MutableList<Boolean>(questionModelList.size) { false }
+    //private var isQuestionBookmarkedList = MutableList<Boolean>(questionModelList.size) { false }
     private val bookmarkedQuestions = mutableListOf<Int>()
-
-
 
     companion object {
         var questionModelList: List<QuestionModel> = listOf()
         var time: String = ""
+
+
     }
 
     var currentQuestionIndex = 0
@@ -46,10 +45,25 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
     var score = 0
     val selectedAnswers = MutableList<String?>(questionModelList.size) { null }
 
+    //-----------------------------
+
+    private var camera: Camera? = null
+    private var surfaceView: SurfaceView? = null
+    private var surfaceHolder: SurfaceHolder? = null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQuizExamBinding.inflate(layoutInflater)   // initialization of binding
         setContentView(binding.root)
+
+        //-------------------------
+
+        surfaceView = findViewById(R.id.cameraPreview)
+        surfaceHolder = surfaceView?.holder
+        surfaceHolder?.addCallback(this)
+
+        //-------------------------
 
         drawerOpenClose()
 
@@ -83,7 +97,7 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
 // Load the bookmark button's initial image
         updateBookmarkButton()
-    }//.................................................................
+    }//.................................................................functions below........................................
 
     private fun displayGridviewData() {
         // Sample data for the GridView
@@ -285,8 +299,6 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-
-
     override fun onClick(view: View?) {
         binding.apply {
             btn0.setBackgroundColor(getColor(R.color.gray))
@@ -330,14 +342,6 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-
-
-
-
-
-
-
-
     private fun loadPreviousQuestion() {
         if (currentQuestionIndex > 0) {
             // Save the selected answer for the current question
@@ -363,7 +367,6 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
             Log.i("Score of Quiz", score.toString())
         }
 
-        
 
         // Change bookmark button image based on next question's bookmark status
         updateBookmarkButton()
@@ -422,7 +425,36 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
         updateGridItemColor()
     }
+    //...........................................................................................................................
+
+
+    override fun surfaceCreated(holder: SurfaceHolder) {
+        try {
+            camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT)
+            camera?.setDisplayOrientation(90)
+            camera?.setPreviewDisplay(holder)
+            camera?.startPreview()
+        } catch (e: Exception) {
+            Log.e("Camera", "Error setting camera preview: ${e.message}")
+        }
+    }
+
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+        // If your requirements include handling surface changes, implement it here
+    }
+
+    override fun surfaceDestroyed(holder: SurfaceHolder) {
+        camera?.stopPreview()
+        camera?.release()
+        camera = null
+    }
+
+
 }
+
+
+
+
 
 
 
