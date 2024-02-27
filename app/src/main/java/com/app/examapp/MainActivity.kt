@@ -2,21 +2,19 @@ package com.app.examapp
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.examapp.adapter.ExamListAdapter
 import com.app.examapp.authentication.SignInActivity
 import com.app.examapp.databinding.ActivityMainBinding
 import com.app.examapp.model.ExamModel
-import com.app.examapp.model.QuestionModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.getValue
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // getting data from firebase
     private fun getDataFromFirebase() {
         binding.progressBar.visibility = View.VISIBLE
         FirebaseDatabase.getInstance().reference
@@ -62,6 +61,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    //setting data to recyclerview
     private fun setupRecyclerView() {
         binding.progressBar.visibility = View.GONE
         adapter = ExamListAdapter(examModelList)
@@ -72,6 +72,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("MissingInflatedId")
+    // logout dialog
     private fun showLogoutDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.logout_dialog, null)
         val builder = AlertDialog.Builder(this)

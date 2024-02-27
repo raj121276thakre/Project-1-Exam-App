@@ -21,22 +21,18 @@ import com.app.examapp.databinding.ActivityQuizExamBinding
 import com.app.examapp.databinding.ScoreDialogBinding
 import com.app.examapp.model.QuestionModel
 
-import android.hardware.Camera
-import android.view.SurfaceHolder
-import android.view.SurfaceView
-
-class QuizExamActivity : AppCompatActivity(), View.OnClickListener, SurfaceHolder.Callback  {
+class QuizExamActivity : AppCompatActivity(), View.OnClickListener {
 
     lateinit var binding: ActivityQuizExamBinding // declaration of binding
 
     private lateinit var drawerLayout: DrawerLayout
+
     //private var isQuestionBookmarkedList = MutableList<Boolean>(questionModelList.size) { false }
     private val bookmarkedQuestions = mutableListOf<Int>()
 
     companion object {
         var questionModelList: List<QuestionModel> = listOf()
         var time: String = ""
-
 
     }
 
@@ -45,25 +41,12 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener, SurfaceHolde
     var score = 0
     val selectedAnswers = MutableList<String?>(questionModelList.size) { null }
 
-    //-----------------------------
-
-    private var camera: Camera? = null
-    private var surfaceView: SurfaceView? = null
-    private var surfaceHolder: SurfaceHolder? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQuizExamBinding.inflate(layoutInflater)   // initialization of binding
         setContentView(binding.root)
 
-        //-------------------------
-
-        surfaceView = findViewById(R.id.cameraPreview)
-        surfaceHolder = surfaceView?.holder
-        surfaceHolder?.addCallback(this)
-
-        //-------------------------
 
         drawerOpenClose()
 
@@ -86,19 +69,18 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener, SurfaceHolde
         displayGridviewData()
 
         binding.bookmarkBtn.setOnClickListener {
-            //updateBookmarkStatus(currentQuestionIndex)
-//            toggleBookmarkStatus(currentQuestionIndex)
-//            updateBookmarkButton()
+
 
             toggleBookmarkStatus(currentQuestionIndex)
             updateBookmarkButton()
             updateGridItemColor()
         }
 
-// Load the bookmark button's initial image
+        // Load the bookmark button's initial image
         updateBookmarkButton()
-    }//.................................................................functions below........................................
+    }
 
+    // book mark feature
     private fun displayGridviewData() {
         // Sample data for the GridView
         val questionNumbers = mutableListOf<String>()
@@ -154,7 +136,7 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener, SurfaceHolde
         }
     }
 
-
+    // drawer open close
     private fun drawerOpenClose() {
         // Find the close_drawerbtn button within the included layout
         val closeDrawerButton: ImageButton = findViewById(R.id.close_drawerbtn)
@@ -175,23 +157,88 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener, SurfaceHolde
         }
     }
 
-    private fun startTimer() {
-        val totalTimeInMills = time.toInt() * 60 * 1000L
-        object : CountDownTimer(totalTimeInMills, 1000L) {
-            override fun onTick(millisUntilFinished: Long) {
-                val seconds = millisUntilFinished / 1000
-                val minutes = seconds / 60
-                val remainingSeconds = seconds % 60
-                //showing timer on timer indicator
-                binding.timerIndicatorTextview.text =
-                    String.format("%02d:%02d", minutes, remainingSeconds)
+
+    private fun updateGridItemColor() {
+        val gridView: GridView = findViewById(R.id.gridView)
+        val currentQuestion = questionModelList[currentQuestionIndex]
+        val currentQuestionNumber = currentQuestion.index - 1 // Adjust index to start from 0
+
+        for (i in 0 until gridView.childCount) {
+            val view = gridView.getChildAt(i)
+            if (view != null) {
+                val questionNumberTextView: TextView = view.findViewById(R.id.question_number)
+                val questionIndex = i
+
+                val isAnswered = selectedAnswers[questionIndex] != null
+                val isBookmarked = questionIndex in bookmarkedQuestions
+
+                if (isBookmarked) {
+                    // Question is bookmarked
+                    questionNumberTextView.backgroundTintList =
+                        ColorStateList.valueOf(Color.parseColor("#F802EC"))
+                } else if (isAnswered) {
+                    // User answered the question
+                    questionNumberTextView.backgroundTintList =
+                        ColorStateList.valueOf(Color.GREEN)
+                } else if (questionIndex == currentQuestionNumber) {
+
+
+                    // Current question
+                    questionNumberTextView.backgroundTintList =
+                        ColorStateList.valueOf(ContextCompat.getColor(this, R.color.yellow))
+
+
+                } else {
+                    // Unanswered question
+                    questionNumberTextView.backgroundTintList =
+                        ColorStateList.valueOf(Color.GRAY)
+                }
+            }
+        }
+    }
+
+
+    //............all question related functions ..............
+    override fun onClick(view: View?) {
+        binding.apply {
+            btn0.setBackgroundColor(getColor(R.color.gray))
+            btn1.setBackgroundColor(getColor(R.color.gray))
+            btn2.setBackgroundColor(getColor(R.color.gray))
+            btn3.setBackgroundColor(getColor(R.color.gray))
+        }
+
+        val clickedBtn = view as Button
+        when (view?.id) {
+            R.id.next_btn -> {
+                // Next button clicked
+                loadNextQuestion()
+                updateGridItemColor()
             }
 
-            override fun onFinish() {
-                //finish the quiz
+            R.id.previous_btn -> {
+                // Previous button clicked
+                loadPreviousQuestion()
+                updateGridItemColor()
+            }
+
+            R.id.submitBtn -> {
+                // Previous button clicked
                 finishQuiz()
             }
-        }.start()
+
+
+            else -> {
+                // Options button clicked
+                selectedAns = clickedBtn.text.toString()
+                clickedBtn.setBackgroundColor(getColor(R.color.orange))
+
+                updateGridItemColor()
+
+
+            }
+        }
+
+
     }
 
     private fun loadQuestions() {
@@ -259,89 +306,6 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener, SurfaceHolde
 
     }
 
-    private fun updateGridItemColor() {
-        val gridView: GridView = findViewById(R.id.gridView)
-        val currentQuestion = questionModelList[currentQuestionIndex]
-        val currentQuestionNumber = currentQuestion.index - 1 // Adjust index to start from 0
-
-        for (i in 0 until gridView.childCount) {
-            val view = gridView.getChildAt(i)
-            if (view != null) {
-                val questionNumberTextView: TextView = view.findViewById(R.id.question_number)
-                val questionIndex = i
-
-                val isAnswered = selectedAnswers[questionIndex] != null
-                val isBookmarked = questionIndex in bookmarkedQuestions
-
-                if (isBookmarked) {
-                    // Question is bookmarked
-                    questionNumberTextView.backgroundTintList =
-                        ColorStateList.valueOf(Color.parseColor("#F802EC"))
-                } else if (isAnswered) {
-                    // User answered the question
-                    questionNumberTextView.backgroundTintList =
-                        ColorStateList.valueOf(Color.GREEN)
-                } else if (questionIndex == currentQuestionNumber) {
-
-
-                    // Current question
-                    questionNumberTextView.backgroundTintList =
-                        ColorStateList.valueOf(ContextCompat.getColor(this, R.color.yellow))
-
-
-                } else {
-                    // Unanswered question
-                    questionNumberTextView.backgroundTintList =
-                        ColorStateList.valueOf(Color.GRAY)
-                }
-            }
-        }
-    }
-
-
-    override fun onClick(view: View?) {
-        binding.apply {
-            btn0.setBackgroundColor(getColor(R.color.gray))
-            btn1.setBackgroundColor(getColor(R.color.gray))
-            btn2.setBackgroundColor(getColor(R.color.gray))
-            btn3.setBackgroundColor(getColor(R.color.gray))
-        }
-
-        val clickedBtn = view as Button
-        when (view?.id) {
-            R.id.next_btn -> {
-                // Next button clicked
-                loadNextQuestion()
-                updateGridItemColor()
-            }
-
-            R.id.previous_btn -> {
-                // Previous button clicked
-                loadPreviousQuestion()
-                updateGridItemColor()
-            }
-
-            R.id.submitBtn -> {
-                // Previous button clicked
-                finishQuiz()
-            }
-
-
-            else -> {
-                // Options button clicked
-                selectedAns = clickedBtn.text.toString()
-                clickedBtn.setBackgroundColor(getColor(R.color.orange))
-
-                updateGridItemColor()
-
-
-            }
-        }
-
-
-    }
-
-
     private fun loadPreviousQuestion() {
         if (currentQuestionIndex > 0) {
             // Save the selected answer for the current question
@@ -389,7 +353,6 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener, SurfaceHolde
         updateGridItemColor()
     }
 
-
     private fun finishQuiz() {
         // after questions finish the score dialog will display with result
         // Check if the selected answer for the last question is correct and increment score if necessary
@@ -425,37 +388,25 @@ class QuizExamActivity : AppCompatActivity(), View.OnClickListener, SurfaceHolde
 
         updateGridItemColor()
     }
-    //...........................................................................................................................
 
+    // start timer
+    private fun startTimer() {
+        val totalTimeInMills = time.toInt() * 60 * 1000L
+        object : CountDownTimer(totalTimeInMills, 1000L) {
+            override fun onTick(millisUntilFinished: Long) {
+                val seconds = millisUntilFinished / 1000
+                val minutes = seconds / 60
+                val remainingSeconds = seconds % 60
+                //showing timer on timer indicator
+                binding.timerIndicatorTextview.text =
+                    String.format("%02d:%02d", minutes, remainingSeconds)
+            }
 
-    override fun surfaceCreated(holder: SurfaceHolder) {
-        try {
-            camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT)
-            camera?.setDisplayOrientation(90)
-            camera?.setPreviewDisplay(holder)
-            camera?.startPreview()
-        } catch (e: Exception) {
-            Log.e("Camera", "Error setting camera preview: ${e.message}")
-        }
+            override fun onFinish() {
+                //finish the quiz
+                finishQuiz()
+            }
+        }.start()
     }
-
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        // If your requirements include handling surface changes, implement it here
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
-        camera?.stopPreview()
-        camera?.release()
-        camera = null
-    }
-
 
 }
-
-
-
-
-
-
-
-

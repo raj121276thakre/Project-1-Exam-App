@@ -1,6 +1,6 @@
 package com.app.examapp.model
 
-//recycler data
+//main activity recycler data
 data class ExamModel(
     val id : String,
     val title : String,
@@ -12,7 +12,7 @@ data class ExamModel(
 
 }
 
-// quiz page data
+// quiz exam page data
 
 data class QuestionModel(
     val index: Int,
